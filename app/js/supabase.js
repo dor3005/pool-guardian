@@ -197,9 +197,17 @@ if (newStatus !== lastNotificationStatus) {
 
 async function initSupabase() {
     await loadLatestPoolStatus();
-    subscribeToPoolStatus();
 
     setInterval(() => {
         loadLatestPoolStatus();
     }, 10000);
+
+    try {
+        subscribeToPoolStatus();
+    } catch (error) {
+        console.error(
+            "Realtime connection failed:",
+            error
+        );
+    }
 }
