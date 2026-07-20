@@ -77,9 +77,15 @@ async function loadLatestPoolStatus() {
     
     applyPoolStatus(data.status);
 
-    lastNotificationStatus =
+    const latestStatus =
     String(data.status).toUpperCase();
 
+if (lastNotificationStatus === null) {
+    lastNotificationStatus = latestStatus;
+} else if (latestStatus !== lastNotificationStatus) {
+    showWaterAlert(latestStatus);
+    lastNotificationStatus = latestStatus;
+}
     poolData.device =
         data.device_online === true ? "ONLINE" : "OFFLINE";
 
@@ -183,4 +189,8 @@ async function initSupabase() {
     await requestNotificationPermission();
     await loadLatestPoolStatus();
     subscribeToPoolStatus();
+
+    setInterval(() => {
+        loadLatestPoolStatus();
+    }, 10000);
 }

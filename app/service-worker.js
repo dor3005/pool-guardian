@@ -1,4 +1,4 @@
-const CACHE_NAME = "pool-guardian-v6";
+const CACHE_NAME = "pool-guardian-v7";
 
 const FILES_TO_CACHE = [
   "./",
