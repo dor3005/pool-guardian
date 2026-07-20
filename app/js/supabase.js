@@ -9,29 +9,57 @@ async function requestNotificationPermission() {
     }
 }
 
-function showWaterAlert(status) {
-    console.log(
-    "Alert received:",
-    status,
-    "Permission:",
-    Notification.permission
-);
-    if (Notification.permission !== "granted") {
+async function showWaterAlert(status) {
+    if (
+        !("Notification" in window) ||
+        Notification.permission !== "granted"
+    ) {
         return;
     }
 
-    const normalizedStatus = String(status).toUpperCase();
+    const normalizedStatus =
+        String(status).toUpperCase();
+
+    let message = null;
 
     if (normalizedStatus === "LOW") {
-        new Notification("Pool Guardian", {
-            body: "⚠️ Pool water level is LOW"
-        });
+        message = "⚠️ Pool water level is LOW";
+    } else if (normalizedStatus === "HIGH") {
+        message = "⚠️ Pool water level is HIGH";
     }
 
-    if (normalizedStatus === "HIGH") {
-        new Notification("Pool Guardian", {
-            body: "⚠️ Pool water level is HIGH"
-        });
+    if (!message) {
+        return;
+    }
+
+    const options = {
+        body: message,
+        icon: "./assets/icon-192.png",
+        badge: "./assets/icon-192.png",
+        tag: `pool-${normalizedStatus}`,
+        renotify: true
+    };
+
+    try {
+        if ("serviceWorker" in navigator) {
+            const registration =
+                await navigator.serviceWorker.ready;
+
+            await registration.showNotification(
+                "Pool Guardian",
+                options
+            );
+        } else {
+            new Notification(
+                "Pool Guardian",
+                options
+            );
+        }
+    } catch (error) {
+        console.error(
+            "Failed to show notification:",
+            error
+        );
     }
 }
 
