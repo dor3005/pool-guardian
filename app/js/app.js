@@ -14,8 +14,29 @@ document.addEventListener("DOMContentLoaded", () => {
     initWaterLevel();
     initDashboard();
     updateDashboard();
-    initSupabase();
-    const notificationButton =
+const debugElement =
+    document.getElementById("debugStatus");
+
+if (typeof initSupabase !== "function") {
+    if (debugElement) {
+        debugElement.textContent =
+            "Debug error: initSupabase not loaded";
+    }
+} else {
+    if (debugElement) {
+        debugElement.textContent =
+            "Debug: starting Supabase…";
+    }
+
+    initSupabase().catch((error) => {
+        console.error(error);
+
+        if (debugElement) {
+            debugElement.textContent =
+                `Debug startup error: ${error.message}`;
+        }
+    });
+}    const notificationButton =
     document.getElementById("enableNotifications");
 
 notificationButton.addEventListener("click", async () => {
