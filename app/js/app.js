@@ -15,7 +15,23 @@ document.addEventListener("DOMContentLoaded", () => {
     initDashboard();
     updateDashboard();
     initSupabase();
-    
+    const notificationButton =
+    document.getElementById("enableNotifications");
+
+notificationButton.addEventListener("click", async () => {
+    await requestNotificationPermission();
+
+    if (Notification.permission === "granted") {
+        notificationButton.textContent =
+            "✅ Notifications Enabled";
+
+        notificationButton.disabled = true;
+    } else {
+        notificationButton.textContent =
+            "🔕 Notifications Blocked";
+    }
+});
+
     if ("serviceWorker" in navigator) {
     navigator.serviceWorker
         .register("./service-worker.js")
