@@ -1,4 +1,4 @@
-const CACHE_NAME = "pool-guardian-v8";
+const CACHE_NAME = "pool-guardian-v10";
 
 const FILES_TO_CACHE = [
   "./",
@@ -48,6 +48,10 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
+  // Never cache live Supabase/API responses.
+  if (url.origin !== self.location.origin) {
+    return;
+  }
   if (
     event.request.method !== "GET" ||
     (url.protocol !== "http:" && url.protocol !== "https:")

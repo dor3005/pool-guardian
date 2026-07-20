@@ -51,7 +51,7 @@ notificationButton.addEventListener("click", async () => {
 });
     if ("serviceWorker" in navigator) {
     navigator.serviceWorker
-        .register("./service-worker.js?v=8")
+        .register("./service-worker.js?v=10")
         .then(() => {
             console.log("Service Worker registered");
         })
