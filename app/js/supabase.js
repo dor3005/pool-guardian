@@ -40,7 +40,17 @@ const SUPABASE_KEY = "sb_publishable_Mse4V2hKkL-KoOfiuuYJZQ_iG5h2-TR";
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
-    SUPABASE_KEY
+    SUPABASE_KEY,
+    {
+        global: {
+            fetch: (url, options = {}) => {
+                return fetch(url, {
+                    ...options,
+                    cache: "no-store"
+                });
+            }
+        }
+    }
 );
 
 function applyPoolStatus(status) {
