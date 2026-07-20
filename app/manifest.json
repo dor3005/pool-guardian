@@ -3,7 +3,7 @@
   "name": "Pool Guardian",
   "short_name": "Pool Guardian",
   "description": "Pool water level and temperature monitoring",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=8",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
