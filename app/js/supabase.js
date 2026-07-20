@@ -186,7 +186,6 @@ if (newStatus !== lastNotificationStatus) {
 }
 
 async function initSupabase() {
-    await requestNotificationPermission();
     await loadLatestPoolStatus();
     subscribeToPoolStatus();
 
