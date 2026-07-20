@@ -109,6 +109,8 @@ async function loadLatestPoolStatus() {
     const latestStatus =
     String(data.status).toUpperCase();
 
+    updateWaterLevel(latestStatus);
+
 if (lastNotificationStatus === null) {
     lastNotificationStatus = latestStatus;
 } else if (latestStatus !== lastNotificationStatus) {
@@ -174,6 +176,8 @@ function subscribeToPoolStatus() {
                 applyPoolStatus(data.status);
                 const newStatus =
     String(data.status).toUpperCase();
+
+    updateWaterLevel(newStatus);
 
 if (newStatus !== lastNotificationStatus) {
     showWaterAlert(newStatus);
