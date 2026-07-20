@@ -19,19 +19,36 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("enableNotifications");
 
 notificationButton.addEventListener("click", async () => {
-    await requestNotificationPermission();
+    notificationButton.textContent =
+        "⏳ Requesting permission...";
 
-    if (Notification.permission === "granted") {
+    if (!("Notification" in window)) {
         notificationButton.textContent =
-            "✅ Notifications Enabled";
+            "❌ Notifications not supported";
+        return;
+    }
 
-        notificationButton.disabled = true;
-    } else {
+    try {
+        const permission =
+            await Notification.requestPermission();
+
+        if (permission === "granted") {
+            notificationButton.textContent =
+                "✅ Notifications Enabled";
+            notificationButton.disabled = true;
+        } else if (permission === "denied") {
+            notificationButton.textContent =
+                "🔕 Notifications Blocked";
+        } else {
+            notificationButton.textContent =
+                "🔔 Permission not selected";
+        }
+    } catch (error) {
+        console.error(error);
         notificationButton.textContent =
-            "🔕 Notifications Blocked";
+            "❌ Notification error";
     }
 });
-
     if ("serviceWorker" in navigator) {
     navigator.serviceWorker
         .register("./service-worker.js")
