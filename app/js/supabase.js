@@ -109,8 +109,25 @@ async function loadLatestPoolStatus() {
     const latestStatus =
     String(data.status).toUpperCase();
 
+   try {
     updateWaterLevel(latestStatus);
 
+    if (debugElement) {
+        const displayedStatus =
+            document.getElementById("waterStatus")
+                ?.textContent;
+
+        debugElement.textContent =
+            `Received ${latestStatus} | UI: ${displayedStatus}`;
+    }
+} catch (error) {
+    console.error("Water display error:", error);
+
+    if (debugElement) {
+        debugElement.textContent =
+            `Display error: ${error.message}`;
+    }
+}
 if (lastNotificationStatus === null) {
     lastNotificationStatus = latestStatus;
 } else if (latestStatus !== lastNotificationStatus) {
