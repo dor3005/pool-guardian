@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="assets/icon-192.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pool Guardian</title>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/water-card.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+
+<header>
+  <h1>🏊 Pool Guardian</h1>
+  <p id="lastUpdate">Last Update: --</p>
+</header>
+
+<main class="dashboard">
+
+  <section class="card water-card">
+
+  <div class="card-header">
+    <h2>💧 Pool & Fertilizer Levels</h2>
+    <div class="status-dot"></div>
+  </div>
+
+  <div class="level-visuals">
+
+    <div class="level-block pool-level">
+
+      <h3>Pool</h3>
+
+      <div class="pool-visual">
+
+        <div class="water-line">
+          <svg class="waves" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M0,40 C150,120 350,0 600,40 C850,80 1050,20 1200,40 L1200,120 L0,120 Z"></path>
+          </svg>
+        </div>
+
+        <div class="float high">
+          <span class="float-label">HIGH</span>
+          <div class="float-ball off"></div>
+        </div>
+
+        <div class="float low">
+          <span class="float-label">LOW</span>
+          <div class="float-ball on"></div>
+        </div>
+
+      </div>
+
+      <h2 id="waterStatus" class="status-title">🟢 NORMAL</h2>
+
+    </div>
+
+    <div class="level-block fertilizer-level">
+
+      <h3>Fertilizer</h3>
+
+      <div class="fertilizer-visual">
+
+        <div id="fertilizerLiquid" class="fertilizer-liquid"></div>
+
+        <div class="fertilizer-sensor">
+          <div class="fertilizer-stem"></div>
+          <div id="fertilizerFloat" class="fertilizer-float"></div>
+        </div>
+
+      </div>
+
+      <h2 id="fertilizerStatus" class="fertilizer-status">
+        🟢 AVAILABLE
+      </h2>
+
+    </div>
+
+  </div>
+
+  <div class="simulation-controls">
+    <button id="simulateLow">LOW</button>
+    <button id="simulateNormal">NORMAL</button>
+    <button id="simulateHigh">HIGH</button>
+    <button id="simulateError">ERROR</button>
+  </div>
+
+</section>
+
+  <section class="side-panel">
+
+    <div class="card">
+      <h2>🌡 Temperature</h2>
+      <p id="temperature">28.6 °C</p>
+    </div>
+
+    <div class="card">
+      <h2>📶 Device</h2>
+      <p id="deviceStatus">ONLINE</p>
+    </div>
+
+  <div class="card">
+    <h2>📡 Wi-Fi Signal</h2>
+    <p id="wifiSignal">-- dBm</p>
+  </div>
+
+  </section>
+
+</main>
+
+<script src="js/mockData.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/waterLevel.js"></script>
+<script src="js/fertilizerLevel.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+
+<script src="js/app.js"></script>
+
+</body>
+</html>

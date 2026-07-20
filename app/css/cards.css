@@ -1,0 +1,53 @@
+.card{
+
+    background:#1e293b;
+    border-radius:20px;
+    padding:22px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.25);
+
+    transition:all .25s ease;
+
+}
+
+.card:hover{
+
+    transform:translateY(-4px);
+
+}
+
+.card h2{
+
+    color:#38bdf8;
+    margin-bottom:15px;
+    font-size:18px;
+
+}
+
+.card p{
+
+    font-size:28px;
+    font-weight:bold;
+
+}
+
+.card-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:15px;
+
+}
+
+.status-dot{
+
+    width:14px;
+    height:14px;
+
+    border-radius:50%;
+
+}

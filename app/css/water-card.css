@@ -1,0 +1,288 @@
+/* ==========================
+   WATER CARD
+========================== */
+
+.water-card{
+    position: relative;
+    min-height: 480px;
+}
+
+/* ==========================
+   Pool
+========================== */
+
+.pool-visual{
+    position: relative;
+    width: 340px;
+    height: 320px;
+    margin: 30px auto;
+    border-radius: 20px;
+    background:#18243a;
+    border:3px solid #2d3d5b;
+    overflow:hidden;
+}
+
+/* ==========================
+   Water
+========================== */
+
+.water-line{
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:65%;
+    overflow:hidden;
+    background:linear-gradient(#4ecbff,#188dd2);
+    transition:height .8s ease;
+}
+
+.waves{
+    position:absolute;
+    top:-18px;
+    left:0;
+    width:200%;
+    height:55px;
+    fill:#67d5ff;
+    animation:waveAnimation 6s linear infinite;
+    opacity:.9;
+}
+
+/* ==========================
+   Floats
+========================== */
+
+.float{
+    position:absolute;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:white;
+    font-weight:bold;
+    z-index:5;
+
+    animation: floatMove 3s ease-in-out infinite;
+}
+
+.float.high{
+    top:42px;
+    right:22px;
+}
+
+.float.low{
+    bottom:62px;
+    right:22px;
+}
+
+.float-label{
+    font-size:18px;
+}
+
+.float-ball{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    border:3px solid white;
+}
+
+.float-ball.on{
+    background:#34d399;
+    box-shadow:0 0 15px #34d399;
+}
+
+.float-ball.off{
+    background:#4b5563;
+    border-color:#9ca3af;
+}
+
+/* ==========================
+   Status
+========================== */
+
+.status-title{
+    margin-top:20px;
+    text-align:center;
+    color:#38bdf8;
+    font-size:44px;
+    font-weight:bold;
+    letter-spacing:2px;
+    text-transform:uppercase;
+}
+
+/* ==========================
+   Animations
+========================== */
+
+@keyframes waveAnimation{
+
+    0%{
+        transform:translateX(0);
+    }
+
+    100%{
+        transform:translateX(-50%);
+    }
+
+}
+
+@keyframes floatMove{
+
+    0%{
+        transform:translateY(0px);
+    }
+
+    50%{
+        transform:translateY(-3px);
+    }
+
+    100%{
+        transform:translateY(0px);
+    }
+
+}
+
+/* ==========================
+   Status Dot
+========================== */
+
+.status-dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+}
+
+.status-dot.normal{
+    background:#22c55e;
+    box-shadow:0 0 12px #22c55e;
+}
+
+.status-dot.low{
+    background:#ef4444;
+    box-shadow:0 0 12px #ef4444;
+}
+
+.status-dot.high{
+    background:#f59e0b;
+    box-shadow:0 0 12px #f59e0b;
+}
+.simulation-controls {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.simulation-controls button {
+  padding: 9px 16px;
+  border: 1px solid #334a6b;
+  border-radius: 8px;
+  background: #132238;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.simulation-controls button:hover {
+  background: #1f8fd1;
+  border-color: #38bdf8;
+  transform: translateY(-2px);
+}
+
+.simulation-controls button:active {
+  transform: translateY(0);
+}
+.simulation-controls button.active {
+  background: #38bdf8;
+  border-color: #7dd3fc;
+  color: #07111f;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.45);
+}
+/* ==========================
+   LEVEL VISUALS LAYOUT
+========================== */
+
+.level-visuals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 35px;
+  align-items: start;
+  margin-top: 20px;
+}
+
+.level-block h3 {
+  margin: 0;
+  text-align: center;
+  color: #38bdf8;
+  font-size: 22px;
+}
+
+.pool-level .pool-visual {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* ==========================
+   FERTILIZER TANK
+========================== */
+
+.fertilizer-visual {
+  position: relative;
+  width: 220px;
+  height: 320px;
+  margin: 20px auto;
+  overflow: hidden;
+  border: 3px solid #2d3d5b;
+  border-radius: 28px 28px 18px 18px;
+  background: #18243a;
+}
+
+.fertilizer-liquid {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 65%;
+  background: linear-gradient(#86efac, #16a34a);
+  transition: height 0.8s ease;
+}
+
+.fertilizer-sensor {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  width: 32px;
+  height: 260px;
+  z-index: 3;
+}
+
+.fertilizer-stem {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 14px;
+  width: 4px;
+  border-radius: 4px;
+  background: #e5e7eb;
+}
+
+.fertilizer-float {
+  position: absolute;
+  bottom: 175px;
+  left: 3px;
+  width: 26px;
+  height: 38px;
+  border: 3px solid #94a3b8;
+  border-radius: 10px;
+  background: #f8fafc;
+  transition: bottom 0.8s ease;
+}
+
+.fertilizer-status {
+  margin-top: 20px;
+  text-align: center;
+  color: #22c55e;
+  font-size: 28px;
+  font-weight: bold;
+}

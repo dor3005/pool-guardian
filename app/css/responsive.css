@@ -1,0 +1,99 @@
+/* ==========================
+   TABLETS
+========================== */
+
+@media (max-width: 900px){
+
+    body{
+        padding:20px;
+    }
+
+    .dashboard{
+        grid-template-columns:1fr;
+    }
+
+    .side-panel{
+        flex-direction:row;
+        flex-wrap:wrap;
+    }
+
+    .side-panel .card{
+        flex:1 1 250px;
+    }
+
+    .pool-visual{
+    width:100%;
+    max-width:260px;
+    height:240px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+    header h1{
+        font-size:30px;
+    }
+
+}
+
+
+/* ==========================
+   PHONES
+========================== */
+
+@media (max-width:600px){
+.level-visuals {
+    grid-template-columns: 1fr;
+    gap: 30px;
+}
+
+.fertilizer-visual {
+    width: 100%;
+    max-width: 220px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.fertilizer-status {
+    font-size: 24px;
+}
+.side-panel {
+    flex-direction: column;
+}
+
+.side-panel .card {
+    width: 100%;
+    flex: none;
+}
+    body{
+        padding:15px;
+    }
+
+    .card{
+        padding:18px;
+    }
+
+    .card p{
+        font-size:22px;
+    }
+
+    .pool-visual {
+    width: 100%;
+    max-width: 260px;
+    height: 240px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+    .float-label{
+        font-size:15px;
+    }
+
+    .status-title{
+        font-size:32px;
+    }
+
+    header h1{
+        font-size:26px;
+    }
+
+}
