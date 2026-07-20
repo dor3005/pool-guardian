@@ -73,6 +73,15 @@ function applyPoolStatus(status) {
 let lastNotificationStatus = null;
 
 async function loadLatestPoolStatus() {
+
+        const debugElement =
+        document.getElementById("debugStatus");
+
+    if (debugElement) {
+        debugElement.textContent =
+            `Debug: polling at ${new Date().toLocaleTimeString()}`;
+    }
+
     const { data, error } = await supabaseClient
         .from("pool_status")
         .select("*")
@@ -80,11 +89,21 @@ async function loadLatestPoolStatus() {
         .limit(1)
         .single();
 
-    if (error) {
-        console.error("Failed to load pool status:", error);
-        return;
+   if (error) {
+    console.error("Failed to load pool status:", error);
+
+    if (debugElement) {
+        debugElement.textContent =
+            `Debug error: ${error.message}`;
     }
-    
+
+    return;
+}
+  if (debugElement) {
+    debugElement.textContent =
+        `Debug: received ${data.status} at ${new Date().toLocaleTimeString()}`;
+}
+  
     applyPoolStatus(data.status);
 
     const latestStatus =
