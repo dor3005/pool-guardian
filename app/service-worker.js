@@ -1,4 +1,4 @@
-const CACHE_NAME = "pool-guardian-v20";
+const CACHE_NAME = "pool-guardian-v21";
 
 const FILES_TO_CACHE = [
   "./",
@@ -18,7 +18,8 @@ const FILES_TO_CACHE = [
   "./js/supabase.js",
   "./js/app.js",
   "./assets/icon-192.png",
-"./assets/icon-512.png",
+  "./assets/icon-512.png",
+  "./assets/notification-badge.png",
 ];
 
 self.addEventListener("install", (event) => {
@@ -95,14 +96,16 @@ self.addEventListener("push", (event) => {
   }
 
   const options = {
-    body: data.body,
-    icon: "./assets/icon-192.png",
-    tag: `pool-${data.status}`,
-    renotify: true,
-    data: {
-      url: "./index.html"
-    }
-  };
+  body: data.body,
+  icon: "./assets/icon-192.png",
+  badge: "./assets/notification-badge.png",
+  color: "#2196F3",
+  tag: `pool-${data.status}`,
+  renotify: true,
+  data: {
+    url: "./index.html"
+  }
+};
 
   event.waitUntil(
     self.registration.showNotification(
