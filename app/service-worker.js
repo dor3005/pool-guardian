@@ -1,4 +1,4 @@
-const CACHE_NAME = "pool-guardian-v10";
+const CACHE_NAME = "pool-guardian-v20";
 
 const FILES_TO_CACHE = [
   "./",
@@ -75,3 +75,72 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(event.request))
   );
 });
+
+self.addEventListener("push", (event) => {
+  let data = {
+    title: "Pool Guardian",
+    body: "Pool status requires attention",
+    status: "ALERT"
+  };
+
+  if (event.data) {
+    try {
+      data = {
+        ...data,
+        ...event.data.json()
+      };
+    } catch (error) {
+      data.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: data.body,
+    icon: "./assets/icon-192.png",
+    tag: `pool-${data.status}`,
+    renotify: true,
+    data: {
+      url: "./index.html"
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(
+      data.title,
+      options
+    )
+  );
+});
+
+self.addEventListener(
+  "notificationclick",
+  (event) => {
+    event.notification.close();
+
+    const appUrl = new URL(
+      "./index.html",
+      self.location.href
+    ).href;
+
+    event.waitUntil(
+      clients
+        .matchAll({
+          type: "window",
+          includeUncontrolled: true
+        })
+        .then((windowClients) => {
+          for (const client of windowClients) {
+            if (
+              client.url.includes(
+                "/pool-guardian/app/"
+              )
+            ) {
+              return client.focus();
+            }
+          }
+
+          return clients.openWindow(appUrl);
+        })
+    );
+  }
+);

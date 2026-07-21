@@ -48,47 +48,40 @@ function setSimulationState(lowFloat, highFloat) {
             "enableNotifications"
         );
 
-    if (notificationButton) {
-        notificationButton.addEventListener(
-            "click",
-            async () => {
+if (notificationButton) {
+    notificationButton.addEventListener(
+        "click",
+        async () => {
+            notificationButton.textContent =
+                "⏳ Enabling Push...";
+
+            try {
+                await enablePushNotifications();
+
                 notificationButton.textContent =
-                    "⏳ Requesting permission...";
+                    "✅ Push Notifications Enabled";
 
-                if (!("Notification" in window)) {
+                notificationButton.disabled = true;
+            } catch (error) {
+                console.error(
+                    "Could not enable Push:",
+                    error
+                );
+
+                if (
+                    "Notification" in window &&
+                    Notification.permission === "denied"
+                ) {
                     notificationButton.textContent =
-                        "❌ Notifications not supported";
-                    return;
-                }
-
-                try {
-                    const permission =
-                        await Notification.requestPermission();
-
-                    if (permission === "granted") {
-                        notificationButton.textContent =
-                            "✅ Notifications Enabled";
-
-                        notificationButton.disabled = true;
-                    } else if (permission === "denied") {
-                        notificationButton.textContent =
-                            "🔕 Notifications Blocked";
-                    } else {
-                        notificationButton.textContent =
-                            "🔔 Permission not selected";
-                    }
-                } catch (error) {
-                    console.error(
-                        "Notification error:",
-                        error
-                    );
-
+                        "🔕 Notifications Blocked";
+                } else {
                     notificationButton.textContent =
-                        "❌ Notification error";
+                        "❌ Push Registration Failed";
                 }
             }
-        );
-    }
+        }
+    );
+}
 
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker
