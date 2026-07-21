@@ -85,7 +85,7 @@ if (notificationButton) {
 
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker
-            .register("./service-worker.js?v=10")
+            .register("./service-worker.js?v=20")
             .then(() => {
                 console.log(
                     "Service Worker registered"
