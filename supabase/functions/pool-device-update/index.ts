@@ -1,5 +1,9 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
+const AUTO_SWIM_WINDOW_MINUTES = 5;
+const AUTO_SWIM_REQUIRED_CHANGES = 4;
+const SWIMMING_MODE_DURATION_MINUTES = 60;
+
 function jsonResponse(
   body: Record<string, unknown>,
   status: number,
@@ -11,7 +15,6 @@ function jsonResponse(
     },
   });
 }
-
 
 async function sendPush(
   title: string,
@@ -33,7 +36,6 @@ async function sendPush(
   }
 
   try {
-
     const response = await fetch(
       `${supabaseUrl}/functions/v1/send-push`,
       {
@@ -55,9 +57,7 @@ async function sendPush(
       },
     );
 
-
     if (!response.ok) {
-
       console.error(
         "Push function failed:",
         response.status,
@@ -67,7 +67,6 @@ async function sendPush(
       return false;
     }
 
-
     console.log(
       "Push sent:",
       await response.text(),
@@ -76,7 +75,6 @@ async function sendPush(
     return true;
 
   } catch (error) {
-
     console.error(
       "Could not call Push function:",
       error,
@@ -87,16 +85,73 @@ async function sendPush(
 }
 
 
-Deno.serve(async (request) => {
+/*
+  Counts real water-level transitions.
 
+  Example:
+
+  Normal
+  Normal
+  High
+  High
+  Normal
+  Low
+  Normal
+
+  = 4 changes
+
+  Error is ignored completely.
+*/
+function countWaterTransitions(
+  rows: Array<{ status: string }>,
+) {
+  const validStatuses = [
+    "Low",
+    "Normal",
+    "High",
+  ];
+
+  let previousValidStatus:
+    string | null = null;
+
+  let changes = 0;
+
+  for (const row of rows) {
+    if (
+      !validStatuses.includes(
+        row.status
+      )
+    ) {
+      continue;
+    }
+
+    if (
+      previousValidStatus !== null &&
+      row.status !== previousValidStatus
+    ) {
+      changes++;
+    }
+
+    previousValidStatus =
+      row.status;
+  }
+
+  return changes;
+}
+
+
+Deno.serve(async (request) => {
   try {
 
-    if (request.method !== "POST") {
+    // ---------------------------------------
+    // METHOD
+    // ---------------------------------------
 
+    if (request.method !== "POST") {
       return jsonResponse(
         {
           error:
-            "Method not allowed"
+            "Method not allowed",
         },
         405,
       );
@@ -117,25 +172,26 @@ Deno.serve(async (request) => {
         "POOL_DEVICE_SECRET"
       );
 
-
     if (
       !expectedSecret ||
       receivedSecret !== expectedSecret
     ) {
-
       return jsonResponse(
         {
           error:
-            "Unauthorized device"
+            "Unauthorized device",
         },
         401,
       );
     }
 
 
+    // ---------------------------------------
+    // REQUEST BODY
+    // ---------------------------------------
+
     const body =
       await request.json();
-
 
     const allowedStatuses = [
       "Low",
@@ -144,17 +200,15 @@ Deno.serve(async (request) => {
       "Error",
     ];
 
-
     if (
       !allowedStatuses.includes(
         body.status
       )
     ) {
-
       return jsonResponse(
         {
           error:
-            "Invalid status"
+            "Invalid status",
         },
         400,
       );
@@ -185,7 +239,7 @@ Deno.serve(async (request) => {
 
 
     // ---------------------------------------
-    // LOAD SWIMMING MODE
+    // LOAD CURRENT SWIMMING MODE
     // ---------------------------------------
 
     const {
@@ -200,9 +254,7 @@ Deno.serve(async (request) => {
         .eq("id", 1)
         .maybeSingle();
 
-
     if (poolControlError) {
-
       console.error(
         "Could not load pool control:",
         poolControlError,
@@ -213,18 +265,22 @@ Deno.serve(async (request) => {
     let swimmingModeActive =
       false;
 
+    let swimmingModeSource:
+      string | null =
+        poolControl
+          ?.swimming_mode_source ??
+        null;
+
 
     if (
       poolControl
         ?.swimming_mode_until
     ) {
-
       const swimmingUntil =
         new Date(
           poolControl
             .swimming_mode_until
         ).getTime();
-
 
       swimmingModeActive =
         swimmingUntil >
@@ -235,13 +291,13 @@ Deno.serve(async (request) => {
     console.log(
       "Swimming mode:",
       swimmingModeActive
-        ? "ACTIVE"
+        ? `ACTIVE (${swimmingModeSource})`
         : "OFF"
     );
 
 
     // ---------------------------------------
-    // LOAD PREVIOUS POOL STATUS
+    // LOAD PREVIOUS STATUS
     // ---------------------------------------
 
     const {
@@ -264,7 +320,6 @@ Deno.serve(async (request) => {
 
 
     if (previousStatusError) {
-
       console.error(
         "Could not load previous status:",
         previousStatusError,
@@ -273,7 +328,7 @@ Deno.serve(async (request) => {
 
 
     // ---------------------------------------
-    // FERTILIZER
+    // FERTILIZER VALUE
     // ---------------------------------------
 
     const fertilizerAvailable =
@@ -294,7 +349,6 @@ Deno.serve(async (request) => {
       await supabaseAdmin
         .from("pool_status")
         .insert({
-
           status:
             body.status,
 
@@ -319,19 +373,154 @@ Deno.serve(async (request) => {
 
 
     if (insertError) {
-
       console.error(
         insertError
       );
 
-
       return jsonResponse(
         {
           error:
-            insertError.message
+            insertError.message,
         },
         500,
       );
+    }
+
+
+    // ---------------------------------------
+    // AUTOMATIC SWIMMING DETECTION
+    // ---------------------------------------
+    //
+    // Only run detection when Swimming Mode
+    // is currently OFF.
+    //
+    // Looks at the last 5 minutes and counts
+    // real transitions between:
+    // Low / Normal / High
+    //
+    // Error does not count.
+    // Duplicate readings do not count.
+    // ---------------------------------------
+
+    let automaticSwimmingDetected =
+      false;
+
+    let detectedTransitions =
+      0;
+
+
+    if (!swimmingModeActive) {
+
+      const windowStart =
+        new Date(
+          Date.now() -
+          AUTO_SWIM_WINDOW_MINUTES *
+          60 *
+          1000
+        );
+
+
+      const {
+        data: recentStatuses,
+        error: recentStatusesError,
+      } =
+        await supabaseAdmin
+          .from("pool_status")
+          .select(
+            "status, created_at"
+          )
+          .gte(
+            "created_at",
+            windowStart.toISOString()
+          )
+          .order(
+            "created_at",
+            {
+              ascending: true,
+            }
+          );
+
+
+      if (recentStatusesError) {
+
+        console.error(
+          "Could not load recent statuses:",
+          recentStatusesError,
+        );
+
+      } else {
+
+        detectedTransitions =
+          countWaterTransitions(
+            recentStatuses ?? []
+          );
+
+
+        console.log(
+          `Water transitions in last ${AUTO_SWIM_WINDOW_MINUTES} minutes:`,
+          detectedTransitions
+        );
+
+
+        if (
+          detectedTransitions >=
+          AUTO_SWIM_REQUIRED_CHANGES
+        ) {
+
+          const swimmingUntil =
+            new Date(
+              Date.now() +
+              SWIMMING_MODE_DURATION_MINUTES *
+              60 *
+              1000
+            );
+
+
+          const {
+            error:
+              swimmingUpdateError,
+          } =
+            await supabaseAdmin
+              .from("pool_control")
+              .update({
+                swimming_mode_until:
+                  swimmingUntil
+                    .toISOString(),
+
+                swimming_mode_source:
+                  "automatic",
+              })
+              .eq("id", 1);
+
+
+          if (
+            swimmingUpdateError
+          ) {
+
+            console.error(
+              "Could not activate automatic Swimming Mode:",
+              swimmingUpdateError,
+            );
+
+          } else {
+
+            swimmingModeActive =
+              true;
+
+            swimmingModeSource =
+              "automatic";
+
+            automaticSwimmingDetected =
+              true;
+
+
+            console.log(
+              "Automatic Swimming Mode activated until:",
+              swimmingUntil.toISOString()
+            );
+          }
+        }
+      }
     }
 
 
@@ -345,7 +534,10 @@ Deno.serve(async (request) => {
         body.status;
 
 
-    // LOW
+    // ---------------------------------------
+    // LOW ALERT
+    // ---------------------------------------
+
     if (
       waterStatusChanged &&
       body.status === "Low"
@@ -370,7 +562,10 @@ Deno.serve(async (request) => {
     }
 
 
-    // HIGH
+    // ---------------------------------------
+    // HIGH ALERT
+    // ---------------------------------------
+
     if (
       waterStatusChanged &&
       body.status === "High"
@@ -395,7 +590,12 @@ Deno.serve(async (request) => {
     }
 
 
-    // ERROR IS NEVER MUTED
+    // ---------------------------------------
+    // ERROR ALERT
+    //
+    // NEVER suppressed by Swimming Mode
+    // ---------------------------------------
+
     if (
       waterStatusChanged &&
       body.status === "Error"
@@ -411,6 +611,8 @@ Deno.serve(async (request) => {
 
     // ---------------------------------------
     // FERTILIZER ALERT
+    //
+    // NEVER suppressed by Swimming Mode
     // ---------------------------------------
 
     const fertilizerBecameLow =
@@ -434,11 +636,25 @@ Deno.serve(async (request) => {
     }
 
 
+    // ---------------------------------------
+    // RESPONSE
+    // ---------------------------------------
+
     return jsonResponse(
       {
         success: true,
+
         swimming_mode_active:
           swimmingModeActive,
+
+        swimming_mode_source:
+          swimmingModeSource,
+
+        automatic_swimming_detected:
+          automaticSwimmingDetected,
+
+        transitions_last_5_minutes:
+          detectedTransitions,
       },
       201,
     );
