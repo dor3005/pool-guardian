@@ -1,125 +1,559 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <link rel="icon" type="image/png" href="assets/icon-192.png">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>Pool Guardian</title>
-  <link rel="manifest" href="manifest.json?v=8">
-<meta name="theme-color" content="#0f172a">
+
+  <link
+    rel="manifest"
+    href="manifest.json?v=8"
+  >
+
+  <meta
+    name="theme-color"
+    content="#0f172a"
+  >
 
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/cards.css">
   <link rel="stylesheet" href="css/water-card.css">
   <link rel="stylesheet" href="css/responsive.css">
+
+  <style>
+    .swimming-card {
+      text-align: center;
+    }
+
+    .swimming-card button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    #startSwimmingMode {
+      background: #0ea5e9;
+      color: white;
+    }
+
+    #stopSwimmingMode {
+      background: #ef4444;
+      color: white;
+    }
+
+    #swimmingModeActive {
+      display: none;
+    }
+
+    #swimmingCountdown {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+
+    #swimmingSource {
+      opacity: 0.75;
+      margin-bottom: 8px;
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
   <h1>🏊 Pool Guardian</h1>
-  <p id="lastUpdate">Last Update: --</p>
+  <p id="lastUpdate">
+    Last Update: --
+  </p>
 </header>
 
-<button id="enableNotifications" type="button">
+
+<button
+  id="enableNotifications"
+  type="button"
+>
   🔔 Enable Notifications
 </button>
 
+
 <main class="dashboard">
+
+  <!-- WATER + FERTILIZER -->
 
   <section class="card water-card">
 
-  <div class="card-header">
-    <h2>💧 Pool & Fertilizer Levels</h2>
-    <div class="status-dot"></div>
-  </div>
+    <div class="card-header">
+      <h2>💧 Pool & Fertilizer Levels</h2>
+      <div class="status-dot"></div>
+    </div>
 
-  <div class="level-visuals">
 
-    <div class="level-block pool-level">
+    <div class="level-visuals">
 
-      <h3>Pool</h3>
+      <!-- POOL -->
 
-      <div class="pool-visual">
+      <div class="level-block pool-level">
 
-        <div class="water-line">
-          <svg class="waves" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M0,40 C150,120 350,0 600,40 C850,80 1050,20 1200,40 L1200,120 L0,120 Z"></path>
-          </svg>
+        <h3>Pool</h3>
+
+        <div class="pool-visual">
+
+          <div class="water-line">
+
+            <svg
+              class="waves"
+              viewBox="0 0 1200 120"
+              preserveAspectRatio="none"
+            >
+
+              <path
+                d="
+                M0,40
+                C150,120 350,0 600,40
+                C850,80 1050,20 1200,40
+                L1200,120
+                L0,120
+                Z
+                "
+              ></path>
+
+            </svg>
+
+          </div>
+
+
+          <div class="float high">
+
+            <span class="float-label">
+              HIGH
+            </span>
+
+            <div class="float-ball off"></div>
+
+          </div>
+
+
+          <div class="float low">
+
+            <span class="float-label">
+              LOW
+            </span>
+
+            <div class="float-ball on"></div>
+
+          </div>
+
         </div>
 
-        <div class="float high">
-          <span class="float-label">HIGH</span>
-          <div class="float-ball off"></div>
-        </div>
 
-        <div class="float low">
-          <span class="float-label">LOW</span>
-          <div class="float-ball on"></div>
-        </div>
+        <h2
+          id="waterStatus"
+          class="status-title"
+        >
+          🟢 NORMAL
+        </h2>
 
       </div>
 
-      <h2 id="waterStatus" class="status-title">🟢 NORMAL</h2>
 
-    </div>
+      <!-- FERTILIZER -->
 
-    <div class="level-block fertilizer-level">
+      <div class="level-block fertilizer-level">
 
-      <h3>Fertilizer</h3>
+        <h3>Fertilizer</h3>
 
-      <div class="fertilizer-visual">
+        <div class="fertilizer-visual">
 
-        <div id="fertilizerLiquid" class="fertilizer-liquid"></div>
+          <div
+            id="fertilizerLiquid"
+            class="fertilizer-liquid"
+          ></div>
 
-        <div class="fertilizer-sensor">
-          <div class="fertilizer-stem"></div>
-          <div id="fertilizerFloat" class="fertilizer-float"></div>
+
+          <div class="fertilizer-sensor">
+
+            <div
+              class="fertilizer-stem"
+            ></div>
+
+            <div
+              id="fertilizerFloat"
+              class="fertilizer-float"
+            ></div>
+
+          </div>
+
         </div>
+
+
+        <h2
+          id="fertilizerStatus"
+          class="fertilizer-status"
+        >
+          🟢 AVAILABLE
+        </h2>
 
       </div>
 
-      <h2 id="fertilizerStatus" class="fertilizer-status">
-        🟢 AVAILABLE
-      </h2>
-
     </div>
 
-  </div>
+  </section>
 
-</section>
+
+  <!-- SIDE PANEL -->
 
   <section class="side-panel">
 
-    <div class="card">
-      <h2>🌡 Temperature</h2>
-      <p id="temperature">28.6 °C</p>
-    </div>
+
+    <!-- TEMPERATURE -->
 
     <div class="card">
-      <h2>📶 Device</h2>
-      <p id="deviceStatus">ONLINE</p>
+
+      <h2>
+        🌡 Temperature
+      </h2>
+
+      <p id="temperature">
+        28.6 °C
+      </p>
+
     </div>
 
-  <div class="card">
-    <h2>📡 Wi-Fi Signal</h2>
-    <p id="wifiSignal">-- dBm</p>
-  </div>
+
+    <!-- DEVICE -->
+
+    <div class="card">
+
+      <h2>
+        📶 Device
+      </h2>
+
+      <p id="deviceStatus">
+        ONLINE
+      </p>
+
+    </div>
+
+
+    <!-- WIFI -->
+
+    <div class="card">
+
+      <h2>
+        📡 Wi-Fi Signal
+      </h2>
+
+      <p id="wifiSignal">
+        -- dBm
+      </p>
+
+    </div>
+
+
+    <!-- SWIMMING MODE -->
+
+    <div class="card swimming-card">
+
+      <h2>
+        🏊 Swimming Mode
+      </h2>
+
+
+      <!-- מצב לא פעיל -->
+
+      <div id="swimmingModeInactive">
+
+        <p>
+          Temporarily mute LOW/HIGH alerts
+          while someone is swimming.
+        </p>
+
+        <button
+          id="startSwimmingMode"
+          type="button"
+        >
+          🏊 Start Swimming Mode — 1 Hour
+        </button>
+
+      </div>
+
+
+      <!-- מצב פעיל -->
+
+      <div id="swimmingModeActive">
+
+        <h3>
+          🏊 Swimming Mode Active
+        </h3>
+
+        <div id="swimmingCountdown">
+          60:00
+        </div>
+
+        <p id="swimmingSource">
+          Started manually
+        </p>
+
+        <button
+          id="stopSwimmingMode"
+          type="button"
+        >
+          🔔 End Swimming Mode Now
+        </button>
+
+      </div>
+
+    </div>
 
   </section>
 
 </main>
 
+
+<!-- EXISTING APP SCRIPTS -->
+
 <script src="js/mockData.js"></script>
+
 <script src="js/dashboard.js"></script>
+
 <script src="js/waterLevel.js"></script>
+
 <script src="js/fertilizerLevel.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js?v=18"></script>
+
+<!-- SUPABASE -->
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="js/supabase.js?v=19"></script>
+
 <script src="js/pushNotifications.js?v=1"></script>
+
 <script src="js/app.js?v=21"></script>
 
+
+<!-- SWIMMING MODE UI -->
+
+<script>
+
+  const startSwimmingButton =
+    document.getElementById(
+      "startSwimmingMode"
+    );
+
+  const stopSwimmingButton =
+    document.getElementById(
+      "stopSwimmingMode"
+    );
+
+
+  async function handleStartSwimmingMode() {
+
+    startSwimmingButton.disabled = true;
+
+    startSwimmingButton.textContent =
+      "Starting...";
+
+    const success =
+      await startSwimmingMode();
+
+
+    if (success) {
+
+      updateSwimmingModeUI();
+
+    } else {
+
+      alert(
+        "Could not start Swimming Mode"
+      );
+
+    }
+
+
+    startSwimmingButton.disabled = false;
+
+    startSwimmingButton.textContent =
+      "🏊 Start Swimming Mode — 1 Hour";
+  }
+
+
+  async function handleStopSwimmingMode() {
+
+    stopSwimmingButton.disabled = true;
+
+    stopSwimmingButton.textContent =
+      "Stopping...";
+
+
+    const success =
+      await stopSwimmingMode();
+
+
+    if (success) {
+
+      updateSwimmingModeUI();
+
+    } else {
+
+      alert(
+        "Could not stop Swimming Mode"
+      );
+
+    }
+
+
+    stopSwimmingButton.disabled = false;
+
+    stopSwimmingButton.textContent =
+      "🔔 End Swimming Mode Now";
+  }
+
+
+  startSwimmingButton.addEventListener(
+    "click",
+    handleStartSwimmingMode
+  );
+
+
+  stopSwimmingButton.addEventListener(
+    "click",
+    handleStopSwimmingMode
+  );
+
+
+  function updateSwimmingModeUI() {
+
+    const inactive =
+      document.getElementById(
+        "swimmingModeInactive"
+      );
+
+    const active =
+      document.getElementById(
+        "swimmingModeActive"
+      );
+
+    const countdown =
+      document.getElementById(
+        "swimmingCountdown"
+      );
+
+    const source =
+      document.getElementById(
+        "swimmingSource"
+      );
+
+
+    if (!isSwimmingModeActive()) {
+
+      inactive.style.display =
+        "block";
+
+      active.style.display =
+        "none";
+
+      return;
+    }
+
+
+    inactive.style.display =
+      "none";
+
+    active.style.display =
+      "block";
+
+
+    const remainingMilliseconds =
+      new Date(
+        swimmingModeUntil
+      ).getTime() -
+      Date.now();
+
+
+    if (
+      remainingMilliseconds <= 0
+    ) {
+
+      inactive.style.display =
+        "block";
+
+      active.style.display =
+        "none";
+
+      return;
+    }
+
+
+    const totalSeconds =
+      Math.floor(
+        remainingMilliseconds /
+        1000
+      );
+
+
+    const minutes =
+      Math.floor(
+        totalSeconds / 60
+      );
+
+
+    const seconds =
+      totalSeconds % 60;
+
+
+    countdown.textContent =
+      `${minutes}:${String(seconds).padStart(2, "0")}`;
+
+
+    if (
+      swimmingModeSource ===
+      "automatic"
+    ) {
+
+      source.textContent =
+        "Detected automatically";
+
+    } else {
+
+      source.textContent =
+        "Started manually";
+    }
+  }
+
+
+  // Update countdown every second
+
+  setInterval(
+    updateSwimmingModeUI,
+    1000
+  );
+
+
+  // Initial UI update
+
+  setTimeout(
+    updateSwimmingModeUI,
+    1000
+  );
+
+</script>
+
 </body>
+
 </html>
