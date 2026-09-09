@@ -127,31 +127,68 @@ async function startSwimmingMode() {
 
 // סיום ידני לפני שעברה שעה
 async function stopSwimmingMode() {
+    let controlSecret =
+        sessionStorage.getItem(
+            "poolControlSecret"
+        );
 
-    const { error } = await supabaseClient
-        .from("pool_control")
-        .update({
-            swimming_mode_until: null,
-            swimming_mode_source: null
-        })
-        .eq("id", 1);
+    if (!controlSecret) {
+        controlSecret = window.prompt(
+            "Enter the Pool Guardian admin password"
+        );
+
+        if (!controlSecret) {
+            return false;
+        }
+
+        sessionStorage.setItem(
+            "poolControlSecret",
+            controlSecret
+        );
+    }
+
+    const { data, error } =
+        await supabaseClient.functions.invoke(
+            "end-swimming-mode",
+            {
+                body: {},
+                headers: {
+                    "x-pool-control-secret":
+                        controlSecret
+                }
+            }
+        );
 
     if (error) {
         console.error(
-            "Failed to stop swimming mode:",
+            "Failed to stop Swimming Mode:",
             error
         );
+
+        sessionStorage.removeItem(
+            "poolControlSecret"
+        );
+
+        alert(
+            "Could not end Swimming Mode. Check the admin password."
+        );
+
         return false;
     }
 
     swimmingModeUntil = null;
     swimmingModeSource = null;
 
-    console.log("Swimming mode stopped");
+    await loadPoolControl();
+
+    console.log(
+        data?.already_ended
+            ? "Swimming Mode was already off"
+            : "Swimming Mode ended and global Push was sent"
+    );
 
     return true;
 }
-
 
 // עדכון מצב שחייה בזמן אמת לכל המכשירים
 function subscribeToPoolControl() {
