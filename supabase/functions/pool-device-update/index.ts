@@ -12,6 +12,7 @@ function jsonResponse(
   });
 }
 
+
 async function sendPush(
   title: string,
   body: string,
@@ -27,18 +28,25 @@ async function sendPush(
     console.error(
       "Push configuration is missing"
     );
+
     return false;
   }
 
   try {
+
     const response = await fetch(
       `${supabaseUrl}/functions/v1/send-push`,
       {
         method: "POST",
+
         headers: {
-          "Content-Type": "application/json",
-          "x-push-secret": pushSecret,
+          "Content-Type":
+            "application/json",
+
+          "x-push-secret":
+            pushSecret,
         },
+
         body: JSON.stringify({
           title,
           body,
@@ -47,7 +55,9 @@ async function sendPush(
       },
     );
 
+
     if (!response.ok) {
+
       console.error(
         "Push function failed:",
         response.status,
@@ -57,13 +67,16 @@ async function sendPush(
       return false;
     }
 
+
     console.log(
       "Push sent:",
       await response.text(),
     );
 
     return true;
+
   } catch (error) {
+
     console.error(
       "Could not call Push function:",
       error,
@@ -73,32 +86,56 @@ async function sendPush(
   }
 }
 
+
 Deno.serve(async (request) => {
+
   try {
+
     if (request.method !== "POST") {
+
       return jsonResponse(
-        { error: "Method not allowed" },
+        {
+          error:
+            "Method not allowed"
+        },
         405,
       );
     }
 
+
+    // ---------------------------------------
+    // DEVICE AUTHENTICATION
+    // ---------------------------------------
+
     const receivedSecret =
-      request.headers.get("x-device-secret");
+      request.headers.get(
+        "x-device-secret"
+      );
 
     const expectedSecret =
-      Deno.env.get("POOL_DEVICE_SECRET");
+      Deno.env.get(
+        "POOL_DEVICE_SECRET"
+      );
+
 
     if (
       !expectedSecret ||
       receivedSecret !== expectedSecret
     ) {
+
       return jsonResponse(
-        { error: "Unauthorized device" },
+        {
+          error:
+            "Unauthorized device"
+        },
         401,
       );
     }
 
-    const body = await request.json();
+
+    const body =
+      await request.json();
+
 
     const allowedStatuses = [
       "Low",
@@ -107,112 +144,263 @@ Deno.serve(async (request) => {
       "Error",
     ];
 
-    if (!allowedStatuses.includes(body.status)) {
+
+    if (
+      !allowedStatuses.includes(
+        body.status
+      )
+    ) {
+
       return jsonResponse(
-        { error: "Invalid status" },
+        {
+          error:
+            "Invalid status"
+        },
         400,
       );
     }
 
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get(
-        "SUPABASE_SERVICE_ROLE_KEY"
-      )!,
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
+
+    // ---------------------------------------
+    // SUPABASE ADMIN CLIENT
+    // ---------------------------------------
+
+    const supabaseAdmin =
+      createClient(
+        Deno.env.get(
+          "SUPABASE_URL"
+        )!,
+
+        Deno.env.get(
+          "SUPABASE_SERVICE_ROLE_KEY"
+        )!,
+
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+          },
         },
-      },
+      );
+
+
+    // ---------------------------------------
+    // LOAD SWIMMING MODE
+    // ---------------------------------------
+
+    const {
+      data: poolControl,
+      error: poolControlError,
+    } =
+      await supabaseAdmin
+        .from("pool_control")
+        .select(
+          "swimming_mode_until, swimming_mode_source"
+        )
+        .eq("id", 1)
+        .maybeSingle();
+
+
+    if (poolControlError) {
+
+      console.error(
+        "Could not load pool control:",
+        poolControlError,
+      );
+    }
+
+
+    let swimmingModeActive =
+      false;
+
+
+    if (
+      poolControl
+        ?.swimming_mode_until
+    ) {
+
+      const swimmingUntil =
+        new Date(
+          poolControl
+            .swimming_mode_until
+        ).getTime();
+
+
+      swimmingModeActive =
+        swimmingUntil >
+        Date.now();
+    }
+
+
+    console.log(
+      "Swimming mode:",
+      swimmingModeActive
+        ? "ACTIVE"
+        : "OFF"
     );
+
+
+    // ---------------------------------------
+    // LOAD PREVIOUS POOL STATUS
+    // ---------------------------------------
 
     const {
       data: previousStatus,
       error: previousStatusError,
-    } = await supabaseAdmin
-      .from("pool_status")
-      .select(
-        "status, fertilizer_available"
-      )
-      .order("created_at", {
-        ascending: false,
-      })
-      .limit(1)
-      .maybeSingle();
+    } =
+      await supabaseAdmin
+        .from("pool_status")
+        .select(
+          "status, fertilizer_available"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false,
+          }
+        )
+        .limit(1)
+        .maybeSingle();
+
 
     if (previousStatusError) {
+
       console.error(
         "Could not load previous status:",
         previousStatusError,
       );
     }
 
+
+    // ---------------------------------------
+    // FERTILIZER
+    // ---------------------------------------
+
     const fertilizerAvailable =
-      typeof body.fertilizer_available ===
-      "boolean"
+      typeof
+        body.fertilizer_available ===
+        "boolean"
         ? body.fertilizer_available
         : null;
 
-    const { error: insertError } =
+
+    // ---------------------------------------
+    // SAVE NEW READING
+    // ---------------------------------------
+
+    const {
+      error: insertError
+    } =
       await supabaseAdmin
         .from("pool_status")
         .insert({
-          status: body.status,
+
+          status:
+            body.status,
+
           temperature:
             typeof body.temperature ===
             "number"
               ? body.temperature
               : null,
+
           fertilizer_available:
             fertilizerAvailable,
+
           wifi_signal:
             typeof body.wifi_signal ===
             "number"
               ? body.wifi_signal
               : null,
-          device_online: true,
+
+          device_online:
+            true,
         });
 
+
     if (insertError) {
-      console.error(insertError);
+
+      console.error(
+        insertError
+      );
+
 
       return jsonResponse(
-        { error: insertError.message },
+        {
+          error:
+            insertError.message
+        },
         500,
       );
     }
 
+
+    // ---------------------------------------
+    // WATER STATUS CHANGE
+    // ---------------------------------------
+
     const waterStatusChanged =
       previousStatus &&
-      previousStatus.status !== body.status;
+      previousStatus.status !==
+        body.status;
 
+
+    // LOW
     if (
       waterStatusChanged &&
       body.status === "Low"
     ) {
-      await sendPush(
-        "Pool Guardian",
-        "⚠️ Pool water level is LOW",
-        "LOW",
-      );
+
+      if (
+        swimmingModeActive
+      ) {
+
+        console.log(
+          "LOW push suppressed because Swimming Mode is active"
+        );
+
+      } else {
+
+        await sendPush(
+          "Pool Guardian",
+          "⚠️ Pool water level is LOW",
+          "LOW",
+        );
+      }
     }
 
+
+    // HIGH
     if (
       waterStatusChanged &&
       body.status === "High"
     ) {
-      await sendPush(
-        "Pool Guardian",
-        "⚠️ Pool water level is HIGH",
-        "HIGH",
-      );
+
+      if (
+        swimmingModeActive
+      ) {
+
+        console.log(
+          "HIGH push suppressed because Swimming Mode is active"
+        );
+
+      } else {
+
+        await sendPush(
+          "Pool Guardian",
+          "⚠️ Pool water level is HIGH",
+          "HIGH",
+        );
+      }
     }
 
+
+    // ERROR IS NEVER MUTED
     if (
       waterStatusChanged &&
       body.status === "Error"
     ) {
+
       await sendPush(
         "Pool Guardian",
         "⚠️ Water level sensors report an invalid state",
@@ -220,13 +408,24 @@ Deno.serve(async (request) => {
       );
     }
 
+
+    // ---------------------------------------
+    // FERTILIZER ALERT
+    // ---------------------------------------
+
     const fertilizerBecameLow =
       previousStatus &&
-      previousStatus.fertilizer_available ===
+      previousStatus
+        .fertilizer_available ===
         true &&
-      fertilizerAvailable === false;
+      fertilizerAvailable ===
+        false;
 
-    if (fertilizerBecameLow) {
+
+    if (
+      fertilizerBecameLow
+    ) {
+
       await sendPush(
         "Pool Guardian",
         "🧴 Fertilizer level is LOW — refill required",
@@ -234,12 +433,23 @@ Deno.serve(async (request) => {
       );
     }
 
+
     return jsonResponse(
-      { success: true },
+      {
+        success: true,
+        swimming_mode_active:
+          swimmingModeActive,
+      },
       201,
     );
+
+
   } catch (error) {
-    console.error(error);
+
+    console.error(
+      error
+    );
+
 
     return jsonResponse(
       {
