@@ -1,0 +1,150 @@
+.statistics-section { margin-top: 25px; }
+
+.statistics-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.statistics-header h2 { margin-bottom: 5px; }
+
+.statistics-subtitle,
+.statistics-meta,
+.statistics-empty {
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.range-selector {
+    display: flex;
+    gap: 8px;
+    padding: 4px;
+    background: #0f172a;
+    border-radius: 12px;
+}
+
+.range-button {
+    border: 0;
+    border-radius: 9px;
+    padding: 9px 14px;
+    background: transparent;
+    color: #94a3b8;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.range-button.active { background: #0284c7; color: #fff; }
+.range-button:disabled { cursor: wait; opacity: .65; }
+
+.statistics-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-value {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.stat-value span {
+    display: block;
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 7px;
+}
+
+.stat-value strong { color: #f8fafc; font-size: 25px; }
+
+.statistics-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(250px, 1fr);
+    gap: 18px;
+}
+
+.statistics-panel {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 16px;
+    min-width: 0;
+}
+
+.statistics-panel h3 { font-size: 15px; margin-bottom: 12px; }
+
+.temperature-chart {
+    display: block;
+    width: 100%;
+    min-height: 220px;
+    overflow: visible;
+}
+
+.chart-grid-line { stroke: #334155; stroke-width: 1; }
+.chart-line { fill: none; stroke: #38bdf8; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.chart-area { fill: url(#temperatureGradient); }
+.chart-label { fill: #94a3b8; font-size: 13px; }
+
+.water-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.water-current { font-weight: 800; }
+.water-current.low { color: #ef4444; }
+.water-current.normal { color: #22c55e; }
+.water-current.high { color: #f97316; }
+
+.water-changes {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 245px;
+    overflow-y: auto;
+}
+
+.water-change {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 9px;
+    background: #1e293b;
+    font-size: 13px;
+}
+
+.water-change time { color: #94a3b8; white-space: nowrap; }
+
+.statistics-error {
+    color: #fca5a5;
+    background: rgba(127, 29, 29, .3);
+    border: 1px solid #991b1b;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.statistics-error[hidden], .statistics-empty[hidden] { display: none; }
+
+@media (max-width: 900px) {
+    .statistics-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .statistics-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+    .statistics-header { align-items: stretch; flex-direction: column; }
+    .range-selector { align-self: stretch; }
+    .range-button { flex: 1; }
+    .stat-value strong { font-size: 21px; }
+}

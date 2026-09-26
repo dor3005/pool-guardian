@@ -1,4 +1,4 @@
-const CACHE_NAME = "pool-guardian-v21";
+const CACHE_NAME = "pool-guardian-v22";
 
 const FILES_TO_CACHE = [
   "./",
@@ -10,12 +10,15 @@ const FILES_TO_CACHE = [
   "./css/cards.css",
   "./css/water-card.css",
   "./css/responsive.css",
+  "./css/statistics.css",
 
   "./js/mockData.js",
   "./js/dashboard.js",
   "./js/waterLevel.js",
   "./js/fertilizerLevel.js",
   "./js/supabase.js",
+  "./js/pushNotifications.js",
+  "./js/statistics.js",
   "./js/app.js",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
