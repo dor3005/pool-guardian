@@ -72,3 +72,47 @@ header p{
     color:#94a3b8;
 
 }
+
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.page-navigation {
+    display: flex;
+    gap: 8px;
+    padding: 5px;
+    border-radius: 14px;
+    background: #1e293b;
+}
+
+.page-link {
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.page-link.active {
+    color: #fff;
+    background: #0284c7;
+}
+
+@media (max-width: 600px) {
+    .app-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .page-navigation {
+        width: 100%;
+    }
+
+    .page-link {
+        flex: 1;
+        text-align: center;
+    }
+}

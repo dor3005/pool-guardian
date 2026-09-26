@@ -16,10 +16,6 @@
         );
     }
 
-    if (typeof initStatistics === "function") {
-        initStatistics();
-    }
-
     const notificationButton =
         document.getElementById(
             "enableNotifications"
@@ -62,7 +58,7 @@
 
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker
-            .register("./service-worker.js?v=22")
+            .register("./service-worker.js?v=24")
             .then(() => {
                 console.log(
                     "Service Worker registered"

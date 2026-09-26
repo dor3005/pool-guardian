@@ -9,6 +9,38 @@
             : "--";
     }
 
+    function formatDateTime(value) {
+        const date = new Date(value);
+
+        if (!Number.isFinite(date.getTime())) {
+            return "--";
+        }
+
+        return date.toLocaleString([], {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    function formatDuration(value) {
+        const totalSeconds = Math.max(0, Number(value) || 0);
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        if (hours > 0) {
+            return `${hours}h ${minutes}m`;
+        }
+
+        if (totalMinutes > 0) {
+            return `${totalMinutes}m`;
+        }
+
+        return `${Math.floor(totalSeconds)}s`;
+    }
+
     function setText(id, value) {
         const element = document.getElementById(id);
         if (element) {
@@ -207,6 +239,85 @@
         });
     }
 
+    function renderSensorErrors(history) {
+        const list = document.getElementById("sensorErrorHistory");
+        const empty = document.getElementById("sensorErrorsEmpty");
+        const periods = Array.isArray(history?.periods)
+            ? [...history.periods].slice(-20).reverse()
+            : [];
+
+        setText("sensorErrorCount", `${Number(history?.total_periods ?? 0)} periods`);
+
+        if (!list || !empty) {
+            return;
+        }
+
+        list.replaceChildren();
+        empty.hidden = periods.length > 0;
+
+        periods.forEach((period) => {
+            const item = document.createElement("li");
+            item.className = "history-item";
+
+            const title = document.createElement("span");
+            title.className = "history-title";
+            title.textContent = period.active ? "Sensor Error · Ongoing" : "Sensor Error";
+
+            const time = document.createElement("span");
+            time.className = "history-time";
+            time.textContent = `${formatDateTime(period.started_at)} → ${period.active ? "Now" : formatDateTime(period.ended_at)}`;
+
+            const duration = document.createElement("span");
+            duration.className = "history-duration";
+            duration.textContent = formatDuration(period.duration_seconds);
+
+            item.append(title, time, duration);
+            list.appendChild(item);
+        });
+    }
+
+    function renderSwimmingModeHistory(history) {
+        const list = document.getElementById("swimmingModeHistory");
+        const empty = document.getElementById("swimmingHistoryEmpty");
+        const sessions = Array.isArray(history?.sessions)
+            ? [...history.sessions].slice(-20).reverse()
+            : [];
+
+        setText("swimmingSessionCount", `${Number(history?.total_sessions ?? 0)} sessions`);
+
+        if (!list || !empty) {
+            return;
+        }
+
+        list.replaceChildren();
+        empty.hidden = sessions.length > 0;
+
+        sessions.forEach((session) => {
+            const item = document.createElement("li");
+            item.className = "history-item";
+
+            const title = document.createElement("span");
+            title.className = `history-title${session.active ? " active-badge" : ""}`;
+            title.textContent = session.active ? "Swimming Mode · Active" : "Swimming Mode";
+
+            const source = document.createElement("span");
+            source.className = `source-badge ${session.source === "automatic" ? "automatic" : "manual"}`;
+            source.textContent = session.source === "automatic" ? "automatic" : "manual";
+            title.appendChild(source);
+
+            const time = document.createElement("span");
+            time.className = "history-time";
+            time.textContent = `${formatDateTime(session.started_at)} → ${formatDateTime(session.ended_at)}`;
+
+            const duration = document.createElement("span");
+            duration.className = "history-duration";
+            duration.textContent = formatDuration(session.duration_seconds);
+
+            item.append(title, time, duration);
+            list.appendChild(item);
+        });
+    }
+
     function renderStatistics(data) {
         const temperature = data?.temperature ?? {};
 
@@ -233,16 +344,20 @@
         });
 
         try {
-            const { data, error } = await supabaseClient.rpc(
-                "get_pool_statistics",
-                { p_range: selectedRange }
-            );
+            const [statisticsResult, sensorResult, swimmingResult] = await Promise.all([
+                supabaseClient.rpc("get_pool_statistics", { p_range: selectedRange }),
+                supabaseClient.rpc("get_sensor_error_history", { p_range: selectedRange }),
+                supabaseClient.rpc("get_swimming_mode_history", { p_range: selectedRange })
+            ]);
 
+            const error = statisticsResult.error || sensorResult.error || swimmingResult.error;
             if (error) {
                 throw error;
             }
 
-            renderStatistics(data);
+            renderStatistics(statisticsResult.data);
+            renderSensorErrors(sensorResult.data);
+            renderSwimmingModeHistory(swimmingResult.data);
         } catch (error) {
             console.error("Could not load statistics:", error);
             showError();

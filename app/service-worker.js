@@ -1,8 +1,9 @@
-const CACHE_NAME = "pool-guardian-v22";
+const CACHE_NAME = "pool-guardian-v24";
 
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
+  "./statistics.html",
   "./manifest.json",
 
   "./css/base.css",
@@ -19,6 +20,7 @@ const FILES_TO_CACHE = [
   "./js/supabase.js",
   "./js/pushNotifications.js",
   "./js/statistics.js",
+  "./js/statisticsPage.js",
   "./js/app.js",
   "./assets/icon-192.png",
   "./assets/icon-512.png",

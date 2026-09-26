@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="assets/icon-192.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pool Guardian Statistics</title>
+  <link rel="manifest" href="manifest.json?v=8">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/cards.css">
+  <link rel="stylesheet" href="css/statistics.css?v=2">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>📊 Pool Statistics</h1>
+      <p>Temperature and water-level history</p>
+    </div>
+    <nav class="page-navigation" aria-label="Main navigation">
+      <a class="page-link" href="index.html">Dashboard</a>
+      <a class="page-link active" href="statistics.html" aria-current="page">Statistics</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="card statistics-section statistics-page" aria-labelledby="statisticsTitle">
+      <div class="statistics-header">
+        <div>
+          <h2 id="statisticsTitle">Water history</h2>
+          <p class="statistics-subtitle" id="statisticsMeta">Loading statistics…</p>
+        </div>
+
+        <div class="range-selector" aria-label="Statistics range">
+          <button class="range-button active" type="button" data-range="24h">24h</button>
+          <button class="range-button" type="button" data-range="7d">7d</button>
+          <button class="range-button" type="button" data-range="30d">30d</button>
+        </div>
+      </div>
+
+      <div id="statisticsError" class="statistics-error" role="alert" hidden></div>
+
+      <div class="statistics-summary">
+        <div class="stat-value"><span>Current</span><strong id="statCurrent">--</strong></div>
+        <div class="stat-value"><span>Minimum</span><strong id="statMin">--</strong></div>
+        <div class="stat-value"><span>Maximum</span><strong id="statMax">--</strong></div>
+        <div class="stat-value"><span>Average</span><strong id="statAverage">--</strong></div>
+      </div>
+
+      <div class="statistics-grid">
+        <div class="statistics-panel">
+          <h3>Water temperature</h3>
+          <svg
+            id="temperatureChart"
+            class="temperature-chart"
+            viewBox="0 0 800 260"
+            role="img"
+            aria-label="Water temperature over time"
+          >
+            <defs>
+              <linearGradient id="temperatureGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"></stop>
+                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"></stop>
+              </linearGradient>
+            </defs>
+            <g id="temperatureChartGrid"></g>
+            <path id="temperatureChartArea" class="chart-area"></path>
+            <path id="temperatureChartLine" class="chart-line"></path>
+            <g id="temperatureChartLabels"></g>
+          </svg>
+          <p id="temperatureChartEmpty" class="statistics-empty" hidden>
+            No temperature readings in this range.
+          </p>
+        </div>
+
+        <div class="statistics-panel">
+          <h3>Water-level changes</h3>
+          <div class="water-summary">
+            <span>Current: <strong id="statisticsWaterCurrent" class="water-current">--</strong></span>
+            <span id="waterChangeCount">0 changes</span>
+          </div>
+          <p id="waterChangesEmpty" class="statistics-empty" hidden>
+            No LOW/NORMAL/HIGH changes in this range.
+          </p>
+          <ul id="waterChanges" class="water-changes" aria-live="polite"></ul>
+        </div>
+      </div>
+
+      <div class="activity-grid">
+        <div class="statistics-panel">
+          <div class="activity-heading">
+            <h3>⚠️ Sensor Error periods</h3>
+            <span id="sensorErrorCount" class="activity-count">0 periods</span>
+          </div>
+          <p id="sensorErrorsEmpty" class="statistics-empty" hidden>
+            No sensor errors in this range.
+          </p>
+          <ul id="sensorErrorHistory" class="history-list" aria-live="polite"></ul>
+        </div>
+
+        <div class="statistics-panel">
+          <div class="activity-heading">
+            <h3>🏊 Swimming Mode history</h3>
+            <span id="swimmingSessionCount" class="activity-count">0 sessions</span>
+          </div>
+          <p id="swimmingHistoryEmpty" class="statistics-empty" hidden>
+            No Swimming Mode sessions in this range.
+          </p>
+          <ul id="swimmingModeHistory" class="history-list" aria-live="polite"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js?v=19"></script>
+  <script src="js/statistics.js?v=3"></script>
+  <script src="js/statisticsPage.js?v=2"></script>
+</body>
+</html>
